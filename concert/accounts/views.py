@@ -1,22 +1,56 @@
 from django.contrib.auth import authenticate,login,logout
 from django.shortcuts import render
-from django.http import HttpResponse,HttpResponseRedirect
-import ticketSales
-import accounts
+from django.http import HttpResponseRedirect
+import ticketSales, accounts
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from accounts.forms import ProfileRegisterForm,ProfileEditForm,UserEditForm
 from django.contrib.auth.models import User
 from accounts.models import ProfileModel
+from accounts.serializers import UserSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 
+
+#----------- api views ----------
+
+@api_view(['POST'])
+def registration_view(request):
+    if request.method == 'POST':
+        serializer = UserSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            user = serializer.save()
+            data["message"] = "Register is done!"
+            data['token'] = Token.objects.get(user=user).key 
+        
+        return Response(data)
+
+@api_view(['POST'])
+def login_view(request):
+    serializer = UserSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    username = serializer.validated_data.get('username')
+    password = serializer.validated_data.get('password')
+    user = authenticate(request, username=username, password=password)
+    if user is None:
+        return Response({'detail': 'Invalid credentials.'})
+
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({'token': token.key})
+
+
+#----------- ui views ----------
 
 def loginView(request):
     #Post
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user = authenticate(request,username=username,password=password)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request,user)
