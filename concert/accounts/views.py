@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from accounts.forms import ProfileRegisterForm,ProfileEditForm,UserEditForm
 from django.contrib.auth.models import User
 from accounts.models import ProfileModel
-from accounts.serializers import UserSerializer
+from accounts.serializers import UserSerializer, UserLoginSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -16,31 +16,36 @@ from rest_framework.authtoken.models import Token
 
 #----------- api views ----------
 
-@api_view(['POST'])
+@api_view(['GET','POST'])
 def registration_view(request):
     if request.method == 'POST':
-        serializer = UserSerializer(data=request.data)
-        data = {}
-        if serializer.is_valid():
-            user = serializer.save()
-            data["message"] = "Register is done!"
-            data['token'] = Token.objects.get(user=user).key 
+        serializer = UserSerializer(data=request.data)    
+        serializer.is_valid(raise_exception=True)
         
+        data = {}
+        user = serializer.save()
+        data["message"] = "Register is done!"
+        data['token'] = Token.objects.get(user=user).key 
         return Response(data)
+    
+    return Response({'detail': 'registarion check.'})
 
-@api_view(['POST'])
+@api_view(['GET','POST'])
 def login_view(request):
-    serializer = UserSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+    if request.method == 'POST':
+        serializer = UserLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    username = serializer.validated_data.get('username')
-    password = serializer.validated_data.get('password')
-    user = authenticate(request, username=username, password=password)
-    if user is None:
-        return Response({'detail': 'Invalid credentials.'})
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return Response({'detail': 'Invalid credentials.'})
 
-    token, _ = Token.objects.get_or_create(user=user)
-    return Response({'token': token.key})
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
+    return Response({'detail': 'login check.'})
+
 
 
 #----------- ui views ----------
