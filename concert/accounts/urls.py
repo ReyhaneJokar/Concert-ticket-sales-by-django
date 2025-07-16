@@ -9,4 +9,5 @@ urlpatterns = [
     path('profileEdit', views.ProfileEditView),
     path('registration_view', views.registration_view),
     path('login_view/', views.login_view),
+    path('api/register/', views.register_view),  #{ username, email, password } → { user, refresh, access }
     ]

@@ -18,12 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ticketSales/', include('ticketSales.urls')),
     path('accounts/', include('accounts.urls')),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  #{ username, password } → { refresh, access }
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  #returns a new token  { refresh } → { access }
 
 ]
 
