@@ -36,7 +36,13 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
     'rest_framework.authtoken',
+    'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -136,10 +143,11 @@ LOGIN_REDIRECT_URL = '/ticketSales/concert/list'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+SITE_ID = 1
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -155,9 +163,13 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+ACCOUNT_EMAIL_VERIFICATION = "none"
