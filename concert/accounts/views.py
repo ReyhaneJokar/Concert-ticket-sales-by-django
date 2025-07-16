@@ -8,11 +8,13 @@ from django.contrib.auth.decorators import login_required
 from accounts.forms import ProfileRegisterForm,ProfileEditForm,UserEditForm
 from django.contrib.auth.models import User
 from accounts.models import ProfileModel
-from accounts.serializers import UserSerializer, UserLoginSerializer
+from accounts.serializers import UserSerializer, UserLoginSerializer, LogoutSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
+from rest_framework import permissions
 
 
 #----------- JWT output views ----------
@@ -40,6 +42,23 @@ def register_view(request):
         'refresh': str(refresh),
         'access': str(access),
     })
+
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        refresh_token = serializer.validated_data['refresh']
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except Exception:
+            return Response({"detail": "Invalid or expired token."})
+
+        return Response({"detail": "Logout successfully."})
 
 
 #----------- api views ----------

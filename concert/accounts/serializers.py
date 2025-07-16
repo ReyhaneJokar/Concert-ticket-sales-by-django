@@ -51,3 +51,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['role'] = profile.role
 
         return data
+    
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def validate_refresh(self, value):
+        if not value:
+            raise serializers.ValidationError("Refresh token is required")
+        return value

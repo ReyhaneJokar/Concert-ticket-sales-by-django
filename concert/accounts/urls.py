@@ -15,7 +15,8 @@ urlpatterns = [
     path('profileEdit', views.ProfileEditView),
     path('registration_view', views.registration_view),
     path('login_view/', views.login_view),
-    path('api/register/', views.register_view),  #{ username, email, password } → { user, refresh, access }
-    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),  #{ username, password } → { refresh, access }
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  #returns a new token  { refresh } → { access }
+    path('api/register/', views.register_view), 
+    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),  # login
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  #returns a new token
+    path('api/logout/', views.LogoutView.as_view(), name='token_logout'),
     ]
