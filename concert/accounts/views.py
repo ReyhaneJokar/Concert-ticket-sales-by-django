@@ -15,20 +15,30 @@ from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-
 #----------- JWT output views ----------
 
 @api_view(['POST'])
 @permission_classes([]) 
 def register_view(request):
+    role = request.data.get('role', ProfileModel.USER)
     serializer = UserSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
+    
+    profile, _ = ProfileModel.objects.get_or_create(user=user)
+    profile.role = role
+    profile.save()
+    
     refresh = RefreshToken.for_user(user)
+    refresh['role'] = profile.role
+    access = refresh.access_token
+    access['role'] = profile.role
+    
     return Response({
         'user': UserSerializer(user).data,
+        'role':    profile.role,       
         'refresh': str(refresh),
-        'access': str(refresh.access_token),
+        'access': str(access),
     })
 
 

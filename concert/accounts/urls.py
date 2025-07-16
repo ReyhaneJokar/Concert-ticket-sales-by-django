@@ -1,5 +1,11 @@
 from django.urls import path
 from accounts import views
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .serializers import CustomTokenObtainPairSerializer
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
 
 urlpatterns = [
     path('login/', views.loginView),
@@ -10,4 +16,6 @@ urlpatterns = [
     path('registration_view', views.registration_view),
     path('login_view/', views.login_view),
     path('api/register/', views.register_view),  #{ username, email, password } → { user, refresh, access }
+    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),  #{ username, password } → { refresh, access }
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  #returns a new token  { refresh } → { access }
     ]
