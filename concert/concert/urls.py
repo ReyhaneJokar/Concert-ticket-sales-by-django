@@ -18,15 +18,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django_prometheus import exports
 
 
 urlpatterns = [
+    path('', include('django_prometheus.urls')),
     path('admin/', admin.site.urls),
     path('ticketSales/', include('ticketSales.urls')),
     path('accounts/', include('accounts.urls')),
     path('api/auth/', include('dj_rest_auth.urls')), # /login , /logout , /password/change , /password/reset , password/reset/confirm/
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')), # /verify-email
-
 ]
 
 if settings.DEBUG:
