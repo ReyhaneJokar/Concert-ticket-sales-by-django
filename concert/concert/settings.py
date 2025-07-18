@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'concert.middleware.request_logging.RequestLoggingMiddleware',
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -182,23 +183,58 @@ EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
 
+LOGS_DIR = Path(BASE_DIR) / "logs"
+LOGS_DIR.mkdir(exist_ok=True)
 
-# LOGGING = {
-#     'version': 1,
-#     'handlers': {
-#         'file': {
-#             'class': 'logging.FileHandler',
-#             'filename': '/var/log/auth_service/app.log',
-#             'formatter': 'verbose',
-#         },
-#     },
-#     'formatters': {
-#         'verbose': {
-#             'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
-#         },
-#     },
-#     'root': {
-#         'handlers': ['file'],
-#         'level': 'INFO',
-#     },
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name} {module}:{lineno} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file_requests': {
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'requests.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        'file_events': {
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'events.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+    },
+
+    'loggers': {
+        'request_logger': {
+            'handlers': ['file_requests', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'event_logger': {
+            'handlers': ['file_events', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+    },
+}

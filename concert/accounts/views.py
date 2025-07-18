@@ -15,7 +15,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework import permissions
+import logging
 
+
+event_logger = logging.getLogger('event_logger')
 
 #----------- JWT output views ----------
 
@@ -26,6 +29,7 @@ def register_view(request):
     serializer = UserSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
+    event_logger.info(f"User registered: id={user.id}, username={user.username}")
     
     profile, _ = ProfileModel.objects.get_or_create(user=user)
     profile.role = role
@@ -55,7 +59,9 @@ class LogoutView(APIView):
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
+            event_logger.info(f"LOGOUT SUCCESS: user_id={request.user.id}, username={request.user.username}")
         except Exception:
+            event_logger.warning(f"LOGOUT FAIL: user_id={getattr(request.user, 'id', 'anon')}, error={str(Exception)}")
             return Response({"detail": "Invalid or expired token."})
 
         return Response({"detail": "Logout successfully."})

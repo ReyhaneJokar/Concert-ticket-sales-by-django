@@ -1,0 +1,2 @@
+[2025-07-18 23:14:08,310] INFO event_logger views:32 User registered: id=15, username=mammad
+[2025-07-18 23:15:22,668] INFO event_logger views:62 LOGOUT SUCCESS: user_id=1, username=admin
